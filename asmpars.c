@@ -1878,28 +1878,30 @@ static Operator Operators[] =
 
      if ((ValFunc = FindFunction(ftemp)))
      {
+       char *pArg = Copy;
+
        strmaxcpy(ftemp, ValFunc->Definition, 255);
        for (z1 = 1; z1 <= ValFunc->ArguCnt; z1++)
        {
-         if (!Copy[0])
+         if (!pArg)
          {
            WrError(1490); LEAVE;
          }
 
-         KlPos = QuotPos(Copy,',');
+         KlPos = QuotPos(pArg, ',');
          if (KlPos)
            *KlPos = '\0';
 
-         EvalExpression(Copy, &LVal);
+         EvalExpression(pArg, &LVal);
          if (LVal.Relocs != Nil)
          {
            WrError(1150); FreeRelocs(&LVal.Relocs); return;
          }
 
          if (!KlPos)
-           Copy[0] = '\0';
+           pArg = NULL;
          else
-           strcpy(Copy, KlPos + 1);
+           pArg = KlPos + 1;
 
          strmaxcpy(stemp, "(", 255);
          switch (LVal.Typ)
@@ -1914,7 +1916,7 @@ static Operator Operators[] =
            case TempString:
              stemp[1] = '"';
              snstrlenprint(stemp + 2, 252, LVal.Contents.Ascii.Contents, LVal.Contents.Ascii.Length);
-             strmaxcat(stemp,"\"",255);
+             strmaxcat(stemp, "\"", 255);
              break;
            default:
              LEAVE;
@@ -1922,11 +1924,11 @@ static Operator Operators[] =
          strmaxcat(stemp,")", 255);
          ExpandLine(stemp, z1, ftemp);
        }
-       if (Copy[0]!='\0')
-        BEGIN
+       if (pArg)
+       {
          WrError(1490); LEAVE;
-        END
-       EvalExpression(ftemp,pErg);
+       }
+       EvalExpression(ftemp, pErg);
        LEAVE;
      }
 
