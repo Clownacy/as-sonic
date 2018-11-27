@@ -1,0 +1,6 @@
+/*.o
+/*.msg
+/*.rsc
+/*.exe
+Makefile.dep
+Makefile.def
