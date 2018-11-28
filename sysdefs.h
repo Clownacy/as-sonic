@@ -11,9 +11,18 @@
 /*           2001-10-13 added ARM/Linux                                      */
 /*                                                                           */
 /*****************************************************************************/
-/* $Id: sysdefs.h,v 1.12 2012-11-28 20:47:29 alfred Exp $                     */
+/* $Id: sysdefs.h,v 1.15 2015/08/21 19:12:19 alfred Exp $                     */
 /*****************************************************************************
  * $Log: sysdefs.h,v $
+ * Revision 1.15  2015/08/21 19:12:19  alfred
+ * - avoid double definition if both K8 and x86_64 set
+ *
+ * Revision 1.14  2015/03/04 18:37:24  alfred
+ * - add AArch64
+ *
+ * Revision 1.13  2014/05/29 10:59:06  alfred
+ * - some const cleanups
+ *
  * Revision 1.12  2012-11-28 20:47:29  alfred
  * - correct typo
  *
@@ -715,6 +724,35 @@ typedef unsigned long long Card64;
 
 #endif /* vax */
 
+#ifdef __aarch64__ 
+
+#define ARCHPRNAME "aarch64"
+
+/*---------------------------------------------------------------------------*/
+/* AArch64 with Linux and GCC: */
+
+#ifdef __linux__
+#define ARCHSYSNAME "unknown-linux"
+#define DEFSMADE
+#define OPENRDMODE "r"
+#define OPENWRMODE "w"
+#define OPENUPMODE "r+"
+#define IEEEFLOAT
+typedef signed char Integ8;
+typedef unsigned char Card8;
+typedef signed short Integ16;
+typedef unsigned short Card16;
+#define HAS16
+typedef signed int Integ32;
+typedef unsigned int Card32;
+typedef signed long Integ64;
+typedef unsigned long Card64;
+#define HAS64
+#define LOCALE_NLS
+#endif
+
+#endif /* __aarch64__ */
+
 /*===========================================================================*/
 /* DEC Alpha platforms */
 
@@ -1079,7 +1117,7 @@ typedef unsigned long Card32;
 /*===========================================================================*/
 /* AMD opteron/athlon64/k8 platforms */
 
-#ifdef __k8__
+#if (defined __k8__) && (!defined __x86_64)
 
 #define ARCHPRNAME "k8"
 
@@ -1118,6 +1156,49 @@ typedef unsigned long long Card64;
 #endif
 
 #endif /* __k8__ */
+
+/*===========================================================================*/
+/* Intel x86_64 platforms */
+
+#ifdef __x86_64
+
+#define ARCHPRNAME "x86_64"
+
+/*---------------------------------------------------------------------------*/
+/* x86-64 with Linux and GCC:
+   amd64 with FreeBSD and GCC:
+   x86-64 with OSX and GCC:
+   
+   principally, a normal *NIX.  We might use 'long' instead of
+   'long long' for 64-bit integers, but I currently cannot verify this. */
+
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__APPLE__)
+#ifdef __linux__
+#define ARCHSYSNAME "unknown-linux"
+#elif defined __FreeBSD__
+#define ARCHSYSNAME "unknown-freebsd"
+#else
+#define ARCHSYSNAME "apple-osx"
+#endif
+#define DEFSMADE
+#define OPENRDMODE "r"
+#define OPENWRMODE "w"
+#define OPENUPMODE "r+"
+#define IEEEFLOAT
+typedef signed char Integ8;
+typedef unsigned char Card8;
+typedef signed short Integ16;
+typedef unsigned short Card16;
+#define HAS16
+typedef signed int Integ32;
+typedef unsigned int Card32;
+typedef signed long long Integ64;
+typedef unsigned long long Card64;
+#define HAS64
+#define LOCALE_NLS
+#endif
+
+#endif /* __x86_64 */
 
 /*===========================================================================*/
 /* ARM platform */
